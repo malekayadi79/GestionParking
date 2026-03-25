@@ -1,0 +1,41 @@
+<div class="container">
+  <div class="header-section">
+    <h1>Gestion des Parkings</h1>
+    <button mat-raised-color="primary" mat-raised-button color="primary" (click)="openAddDialog()">
+      <mat-icon>add</mat-icon> Nouveau Parking
+    </button>
+  </div>
+
+  <table mat-table [dataSource]="parkings" class="mat-elevation-z8">
+    
+    <ng-container matColumnDef="nom">
+      <th mat-header-cell *matHeaderCellDef> Nom du Parking </th>
+      <td mat-cell *matCellDef="let element"> {{element.nom}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="typeParking">
+      <th mat-header-cell *matHeaderCellDef> Type </th>
+      <td mat-cell *matCellDef="let element"> {{element.typeParking}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="prixInitial">
+      <th mat-header-cell *matHeaderCellDef> Prix de base </th>
+      <td mat-cell *matCellDef="let element"> {{element.prixInitial}} TND </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-icon-button color="accent" (click)="openEditDialog(element)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteParking(element.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>
