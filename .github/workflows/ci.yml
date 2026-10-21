@@ -23,17 +23,17 @@ jobs:
         run: chmod +x mvnw && ./mvnw -B clean verify
       - name: Docker build
         run: docker build -t gestion-parking:${{ github.sha }} .
-      - name: Trivy report (HIGH + CRITICAL, informative)
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: gestion-parking:${{ github.sha }}
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: "0"
+      - name: Install Trivy
+        run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin v0.76.1
+
+      - name: Trivy report (HIGH + CRITICAL)
+        run: |
+          trivy image --ignore-unfixed --severity HIGH,CRITICAL --format table -o trivy.txt gestion-parking:${{ github.sha }}
+          { echo '### Trivy report'; echo '```'; cat trivy.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          cat trivy.txt
+          # one annotation per vulnerability (visible on the run page)
+          trivy image --skip-db-update --ignore-unfixed --severity HIGH,CRITICAL --format template \
+            --template '{{range .}}{{range .Vulnerabilities}}::warning title={{.VulnerabilityID}} ({{.Severity}})::{{.PkgName}} {{.InstalledVersion}} -> fixed in {{.FixedVersion}}{{"\n"}}{{end}}{{end}}' gestion-parking:${{ github.sha }}
+
       - name: Trivy gate (fail on fixable CRITICAL)
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: gestion-parking:${{ github.sha }}
-          severity: CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
+        run: trivy image --skip-db-update --ignore-unfixed --severity CRITICAL --exit-code 1 gestion-parking:${{ github.sha }}
