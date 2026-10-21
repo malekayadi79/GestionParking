@@ -103,7 +103,7 @@ docker run -d -p 27017:27017 mongo:7
 
 ## CI
 
-GitHub Actions builds and tests the project against a real MongoDB service container, builds the Docker image and scans it with **Trivy** (pipeline fails on fixable HIGH/CRITICAL vulnerabilities).
+GitHub Actions builds and tests the project against a real MongoDB service container, builds the Docker image and scans it with **Trivy**: a full HIGH/CRITICAL report is printed, and the pipeline fails on any fixable CRITICAL vulnerability.
 
 ## Tech stack
 

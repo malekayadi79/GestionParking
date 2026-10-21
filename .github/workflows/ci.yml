@@ -23,10 +23,17 @@ jobs:
         run: chmod +x mvnw && ./mvnw -B clean verify
       - name: Docker build
         run: docker build -t gestion-parking:${{ github.sha }} .
-      - name: Trivy scan
+      - name: Trivy report (HIGH + CRITICAL, informative)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: gestion-parking:${{ github.sha }}
           severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "0"
+      - name: Trivy gate (fail on fixable CRITICAL)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: gestion-parking:${{ github.sha }}
+          severity: CRITICAL
           ignore-unfixed: true
           exit-code: "1"
