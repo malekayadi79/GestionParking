@@ -1,0 +1,42 @@
+# docker compose up -d --build
+#   API + Swagger : http://localhost:8080/swagger-ui.html
+#   Mongo Express : http://localhost:8081
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    environment:
+      SPRING_MONGODB_HOST: mongo
+      SPRING_MONGODB_PORT: "27017"
+      SPRING_MONGODB_DATABASE: parking_db
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+      ME_CONFIG_BASICAUTH: "false"
+    ports:
+      - "8081:8081"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    profiles: ["debug"]   # start with: docker compose --profile debug up -d
+
+volumes:
+  mongo-data:

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parking-api
+spec:
+  replicas: 2
+  strategy:
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
+  selector:
+    matchLabels:
+      app: parking-api
+  template:
+    metadata:
+      labels:
+        app: parking-api
+    spec:
+      containers:
+        - name: api
+          image: malekayedi79/gestion-parking:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_MONGODB_HOST
+              value: mongo
+            - name: SPRING_MONGODB_DATABASE
+              value: parking_db
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: 500m, memory: 512Mi}
+          readinessProbe:
+            tcpSocket: {port: 8080}
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket: {port: 8080}
+            initialDelaySeconds: 40
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: parking-api
+spec:
+  selector:
+    app: parking-api
+  ports:
+    - port: 80
+      targetPort: 8080
